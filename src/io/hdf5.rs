@@ -255,7 +255,7 @@ impl From<Hdf5Lor> for LOR {
             dt: ns(dt),
             p1: Point::new(mm(x1), mm(y1), mm(z1)),
             p2: Point::new(mm(x2), mm(y2), mm(z2)),
-            additive_correction: ratio(f32::NAN)
+            additive_correction: ratio(1.0)
         }
     }
 }
