@@ -111,10 +111,35 @@ pub fn read_lors(args: Args) -> Result<Vec<LOR>, Box<dyn Error>> {
 }
 
 use ndhistogram::ndhistogram;
+use crate::lorogram::{axis_dz, axis_phi, axis_r, axis_z, Lorogram, Prompt, Scattergram};
+fn define_histogram(lgram_name: &str) -> Box<dyn Lorogram> {
+    if lgram_name.contains("Zaxis") {
+        let nbins_z = 10;
+        let l = mm(200.0);
+        Box::new(ndhistogram!(axis_z(nbins_z, -l/2.0, l/2.0); usize))
+    } else if lgram_name.contains("Raxis") {
+        let nbins_r = 10;
+        let r_max = mm(120.0);
+        Box::new(ndhistogram!(axis_r(nbins_r, r_max); usize))
+    } else if lgram_name.contains("Phiaxis") {
+        let nbins_phi = 10;
+        Box::new(ndhistogram!(axis_phi(nbins_phi); usize))
+    } else if lgram_name.contains("dzaxis") {
+        let nbins_dz = 10;
+        let dz_max = mm(1000.0);
+        Box::new(ndhistogram!(axis_dz(nbins_dz, dz_max); usize))
+    } else if lgram_name.contains("Zdzaxis") {
+        let nbins_z = 10;
+        let l = mm(200.0);
+        let nbins_dz = 10;
+        let dz_max = mm(1000.0);
+        Box::new(ndhistogram!(axis_z(nbins_z , -l/2.0, l/2.0), axis_dz(nbins_dz, dz_max); usize))
+    } else {
+        panic!("Unknown lorogram implementation.")
+    }
+}
 
-use crate::lorogram::{axis_r, Lorogram, Prompt, Scattergram};
-
-pub fn read_scattergram(args: Args) -> Result<Scattergram, Box<dyn Error>> {
+pub fn read_scattergram(args: Args, lgram_name: &str) -> Result<Scattergram, Box<dyn Error>> {
     fn fill_scattergram(make_empty_lorogram: &(dyn Fn() -> Box<dyn Lorogram>), lors: ndarray::Array1<Hdf5Lor>) ->  Scattergram {
         let mut sgram = Scattergram::new(make_empty_lorogram);
         for h5lor @Hdf5Lor { x1, x2, E1, E2, .. } in lors {
@@ -125,10 +150,8 @@ pub fn read_scattergram(args: Args) -> Result<Scattergram, Box<dyn Error>> {
         sgram
     }
     let h5lors = read_table::<Hdf5Lor>(&args.input_file, &args.dataset, args.event_range.clone())?;
-    let nbins_r = 10;
-    let r_max = 120.0;
     let now = std::time::Instant::now();
-    let sgram = fill_scattergram(&|| Box::new(ndhistogram!(axis_r(nbins_r, mm(r_max)); usize)), h5lors);
+    let sgram = fill_scattergram(&|| define_histogram(lgram_name), h5lors);
     println!("Calculated Scattergram in {} ms", crate::utils::group_digits(now.elapsed().as_millis()));
     Ok(sgram)
 }

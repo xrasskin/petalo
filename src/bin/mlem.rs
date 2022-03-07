@@ -114,10 +114,15 @@ fn main() -> Result<(), Box<dyn Error>> {
     println!("Reading LOR data from disk ...");
     let mut measured_lors = io::hdf5::read_lors(io_args.clone())?;
     report_time("Loaded LOR data from disk");
-    if args.scatter_pdf.is_some() {
-        let sgram = io::hdf5::read_scattergram(io_args)?;
-        calculate_additive_correction(&mut measured_lors, sgram);
-        report_time("Added additive correction values to LORs");
+    // if args.scatter_pdf.is_some() {
+    match args.scatter_pdf.clone() {
+        None => (),
+        Some(lgram_path) => {
+            let lgram_name = lgram_path.to_str().unwrap();
+            let sgram = io::hdf5::read_scattergram(io_args, lgram_name)?;
+            calculate_additive_correction(&mut measured_lors, sgram);
+            report_time("Added additive correction values to LORs");
+        }
     }
 
     // Define field of view extent and voxelization
