@@ -134,6 +134,18 @@ fn define_histogram(lgram_name: &str) -> Box<dyn Lorogram> {
         let nbins_dz = 10;
         let dz_max = mm(1000.0);
         Box::new(ndhistogram!(axis_z(nbins_z , -l/2.0, l/2.0), axis_dz(nbins_dz, dz_max); usize))
+    } else if lgram_name.contains("ZRaxis") {
+        let nbins_z = 10;
+        let l = 200.0;
+        let nbins_r = 10;
+        let r_max = 120.0;
+        Box::new(ndhistogram!(axis_z(nbins_z , -l/2.0, l/2.0), axis_r(nbins_r, r_max); usize))
+    } else if lgram_name.contains("Rdzaxis") {
+        let nbins_r = 10;
+        let r_max = 120.0;
+        let nbins_dz = 10;
+        let dz_max = 1000.0;
+        Box::new(ndhistogram!(axis_r(nbins_r, r_max), axis_dz(nbins_dz, dz_max); usize))
     } else {
         panic!("Unknown lorogram implementation.")
     }
