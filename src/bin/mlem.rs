@@ -114,7 +114,6 @@ fn main() -> Result<(), Box<dyn Error>> {
     println!("Reading LOR data from disk ...");
     let mut measured_lors = io::hdf5::read_lors(io_args.clone())?;
     report_time("Loaded LOR data from disk");
-    // if args.scatter_pdf.is_some() {
     match args.scatter_pdf.clone() {
         None => (),
         Some(lgram_path) => {
