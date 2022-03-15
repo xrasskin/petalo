@@ -55,9 +55,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         println!("     z       (s/t) + 1     trues   scatters");
         for i in 0..nbins_z {
             let z = l0 + (i as f32 + 0.5) * step_z;
-            let p = (0.0, 0.0, z as f32);
+            let p = (mm(0.0), mm(0.0), mm(z as f32));
             let (v, t, s) = sgram.triplet(&mk_lor((p, p)));
-            let v = ratio_(v);
             println!("{z:7.1}   {v:10.2}    {t:8}  {s:8}");
         }
     }
@@ -72,12 +71,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         println!("   phi       (s/t) + 1     trues   scatters");
         for i in 0..nbins_phi {
             let phi = PI * ((i as f32 + 0.5) / nbins_phi as f32);
-            let x = phi.cos();
-            let y = phi.sin();
-            let p1 = (x, 0.0, 0.0);
-            let p2 = (0.0, y, 0.0);
+            let x = mm(phi.cos());
+            let y = mm(phi.sin());
+            let p1 = (x, mm(0.0), mm(0.0));
+            let p2 = (mm(0.0), y, mm(0.0));
             let (v, t, s) = sgram.triplet(&mk_lor((p1, p2)));
-            let v = ratio_(v);
             let phi_in_degrees = phi * 180.0 / PI;
             println!("{phi_in_degrees:7.1}   {v:10.2}    {t:8}  {s:8}");
         }
@@ -92,10 +90,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         println!("     r       (s/t) + 1     trues   scatters");
         for i in 0..nbins_r {
             let r = (i as f32 + 0.5) * step_r;
-            let p1 = (r,  100.0, 0.0);
-            let p2 = (r, -100.0, 0.0);
+            let p1 = (mm(r), mm( 100.0), mm(0.0));
+            let p2 = (mm(r), mm(-100.0), mm(0.0));
             let (v, t, s) = sgram.triplet(&mk_lor((p1, p2)));
-            let v = ratio_(v);
             println!("{r:7.1}   {v:10.2}    {t:8}  {s:8}");
         }
     }
@@ -109,10 +106,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         println!("     dz      (s/t) + 1     trues   scatters");
         for i in 0..nbins_dz {
             let dz = (i as f32 + 0.5) * step_dz;
-            let p1 = (0.0, 0.0,  dz/2.0);
-            let p2 = (0.0, 0.0, -dz/2.0);
+            let p1 = (mm(0.0), mm(0.0), mm( dz/2.0));
+            let p2 = (mm(0.0), mm(0.0), mm(-dz/2.0));
             let (v, t, s) = sgram.triplet(&mk_lor((p1, p2)));
-            let v = ratio_(v);
             println!("{dz:7.1}   {v:10.2}    {t:8}  {s:8}");
         }
     }
@@ -141,10 +137,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             print!("{z:6.1}    ");
             for j in 0..nbins_dz {
                 let dz = (j as f32 + 0.5) * step_dz;
-                let p1 = (0.0, 0.0, z + dz/2.0);
-                let p2 = (0.0, 0.0, z - dz/2.0);
+                let p1 = (mm(0.0), mm(0.0), mm(z + dz/2.0));
+                let p2 = (mm(0.0), mm(0.0), mm(z - dz/2.0));
                 let v = sgram.value(&mk_lor((p1, p2)));
-                let v = ratio_(v);
                 print!(" {v:6.1}");
             }
             println!();
@@ -175,10 +170,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             print!("{z:6.1}    ");
             for j in 0..nbins_r {
                 let r  = (j as f32 + 0.5) * step_r;
-                let p1 = (r, -100.0, z);
-                let p2 = (r,  100.0, z);
+                let p1 = (mm(r), mm(-100.0), mm(z));
+                let p2 = (mm(r), mm( 100.0), mm(z));
                 let v = sgram.value(&mk_lor((p1, p2)));
-                let v = ratio_(v);
                 print!(" {v:6.1}");
             }
             println!();
@@ -215,9 +209,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 print!("{z:6.1}    ");
                 for j in 0..nbins_r {
                     let r  = (j as f32 + 0.5) * step_r;
-                    let p1 = (r, -100.0, z+dz/2.0);
-                    let p2 = (r,  100.0, z-dz/2.0);
-                    let v = ratio_(sgram.value(&mk_lor((p1, p2))));
+                    let p1 = (mm(r), mm(-100.0), mm(z+dz/2.0));
+                    let p2 = (mm(r), mm( 100.0), mm(z-dz/2.0));
+                    let v = sgram.value(&mk_lor((p1, p2)));
                     print!(" {v:6.1}");
                 }
                 println!();
