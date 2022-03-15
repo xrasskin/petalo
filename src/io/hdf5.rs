@@ -136,15 +136,15 @@ fn define_histogram(lgram_name: &str) -> Box<dyn Lorogram> {
         Box::new(ndhistogram!(axis_z(nbins_z , -l/2.0, l/2.0), axis_dz(nbins_dz, dz_max); usize))
     } else if lgram_name.contains("ZRaxis") {
         let nbins_z = 10;
-        let l = 200.0;
+        let l = mm(200.0);
         let nbins_r = 10;
-        let r_max = 120.0;
+        let r_max = mm(120.0);
         Box::new(ndhistogram!(axis_z(nbins_z , -l/2.0, l/2.0), axis_r(nbins_r, r_max); usize))
     } else if lgram_name.contains("Rdzaxis") {
         let nbins_r = 10;
-        let r_max = 120.0;
+        let r_max = mm(120.0);
         let nbins_dz = 10;
-        let dz_max = 1000.0;
+        let dz_max = mm(1000.0);
         Box::new(ndhistogram!(axis_r(nbins_r, r_max), axis_dz(nbins_dz, dz_max); usize))
     } else {
         panic!("Unknown lorogram implementation.")
@@ -161,7 +161,10 @@ pub fn read_scattergram(args: Args, lgram_name: &str) -> Result<Scattergram, Box
         }
         sgram
     }
-    let h5lors = read_table::<Hdf5Lor>(&args.input_file, &args.dataset, args.event_range.clone())?;
+    let h5lors = read_table::<Hdf5Lor>(&args.input_file, &args.dataset, args.event_range.clone())?
+                                                    .iter().cloned().filter(|Hdf5Lor{E1, E2, ..}| {
+                                                        args.ecut.contains(E1) && args.ecut.contains(E2)
+                                                    }).collect();
     let now = std::time::Instant::now();
     let sgram = fill_scattergram(&|| define_histogram(lgram_name), h5lors);
     println!("Calculated Scattergram in {} ms", crate::utils::group_digits(now.elapsed().as_millis()));

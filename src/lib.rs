@@ -1,4 +1,4 @@
-mod exports;
+pub mod exports;
 pub use exports::*;
 
 pub mod system_matrix;
