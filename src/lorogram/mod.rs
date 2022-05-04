@@ -5,7 +5,7 @@ use axis::Cyclic;
 use crate::io::hdf5::Hdf5Lor;
 use crate::exports::{LOR, Point, Length};
 use crate::exports::{Lengthf32, Ratiof32, Anglef32};
-use geometry::uom::{mm_, mm, ns, ratio};
+use geometry::uom::{mm_, ns, ratio};
 use std::f32::consts::PI;
 
 /// Distinguish between true, scatter and random prompt signals
@@ -132,6 +132,7 @@ pub fn axis_phi(nbins: usize) -> LorAxC {
 mod test_mapped_axes {
     use super::*;
     use ndhistogram::ndhistogram;
+    use geometry::uom::mm;
 
     #[test]
     fn uniform() {
