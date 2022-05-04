@@ -1,7 +1,5 @@
 pub mod axis;
 
-mod old;
-pub use old::*;
 use ndhistogram::{axis::{Axis, Uniform}, Histogram};
 use axis::Cyclic;
 use crate::io::hdf5::Hdf5Lor;
