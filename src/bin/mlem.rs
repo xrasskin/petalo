@@ -49,9 +49,9 @@ pub struct Cli {
     #[structopt(long)]
     pub sensitivity_image: Option<PathBuf>,
 
-    /// Scatter pdf to be used for corrections
+    /// Apply scatter corrections, using given Lorogram axes
     #[structopt(long)]
-    pub scatter_pdf: Option<PathBuf>,
+    pub correct_scatter: Option<io::hdf5::LorogramAxes>,
 
     /// Use true rather than reco LOR data
     #[structopt(long)]
@@ -114,14 +114,10 @@ fn main() -> Result<(), Box<dyn Error>> {
     println!("Reading LOR data from disk ...");
     let mut measured_lors = io::hdf5::read_lors(io_args.clone())?;
     report_time("Loaded LOR data from disk");
-    match args.scatter_pdf.clone() {
-        None => (),
-        Some(lgram_path) => {
-            let lgram_name = lgram_path.to_str().unwrap();
-            let sgram = io::hdf5::read_scattergram(io_args, lgram_name)?;
-            calculate_additive_correction(&mut measured_lors, sgram);
-            report_time("Added additive correction values to LORs");
-        }
+    if let Some(lorogram_axes) = args.correct_scatter {
+        let sgram = io::hdf5::read_scattergram(io_args, lorogram_axes)?;
+        calculate_additive_correction(&mut measured_lors, sgram);
+        report_time("Added additive correction values to LORs");
     }
 
     // Define field of view extent and voxelization

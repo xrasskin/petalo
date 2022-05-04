@@ -112,54 +112,77 @@ pub fn read_lors(args: Args) -> Result<Vec<LOR>, Box<dyn Error>> {
 
 use ndhistogram::ndhistogram;
 use crate::lorogram::{axis_dz, axis_phi, axis_r, axis_z, Lorogram, Prompt, Scattergram};
-fn define_histogram(lgram_name: &str) -> Box<dyn Lorogram> {
-    if lgram_name.contains("Zaxis") {
-        let nbins_z = 10;
-        let l = mm(200.0);
-        Box::new(ndhistogram!(axis_z(nbins_z, -l/2.0, l/2.0); usize))
-    } else if lgram_name.contains("Raxis") {
-        let nbins_r = 10;
-        let r_max = mm(120.0);
-        Box::new(ndhistogram!(axis_r(nbins_r, r_max); usize))
-    } else if lgram_name.contains("Phiaxis") {
-        let nbins_phi = 10;
-        Box::new(ndhistogram!(axis_phi(nbins_phi); usize))
-    } else if lgram_name.contains("dzaxis") {
-        let nbins_dz = 10;
-        let dz_max = mm(1000.0);
-        Box::new(ndhistogram!(axis_dz(nbins_dz, dz_max); usize))
-    } else if lgram_name.contains("Zdzaxis") {
-        let nbins_z = 10;
-        let l = mm(200.0);
-        let nbins_dz = 10;
-        let dz_max = mm(1000.0);
-        Box::new(ndhistogram!(axis_z(nbins_z , -l/2.0, l/2.0), axis_dz(nbins_dz, dz_max); usize))
-    } else if lgram_name.contains("ZRaxis") {
-        let nbins_z = 10;
-        let l = mm(200.0);
-        let nbins_r = 10;
-        let r_max = mm(120.0);
-        Box::new(ndhistogram!(axis_z(nbins_z , -l/2.0, l/2.0), axis_r(nbins_r, r_max); usize))
-    } else if lgram_name.contains("Rdzaxis") {
-        let nbins_r = 10;
-        let r_max = mm(120.0);
-        let nbins_dz = 10;
-        let dz_max = mm(1000.0);
-        Box::new(ndhistogram!(axis_r(nbins_r, r_max), axis_dz(nbins_dz, dz_max); usize))
-    } else if lgram_name.contains("ZRdzaxis") {
-        let nbins_z = 10;
-        let l = mm(200.0);
-        let nbins_r = 10;
-        let r_max = mm(120.0);
-        let nbins_dz = 10;
-        let dz_max = mm(1000.0);
-        Box::new(ndhistogram!(axis_z(nbins_z , -l/2.0, l/2.0), axis_r(nbins_r, r_max), axis_dz(nbins_dz, dz_max); usize))
-    } else {
-        panic!("Unknown lorogram implementation.")
+fn define_histogram(lorogram_axes: LorogramAxes) -> Box<dyn Lorogram> {
+    use LorogramAxes::*;
+    match lorogram_axes {
+
+        Z => {
+            let nbins_z = 10;
+            let l = mm(200.0);
+            Box::new(ndhistogram!(axis_z(nbins_z, -l/2.0, l/2.0); usize))
+        },
+
+        R => {
+            let nbins_r = 10;
+            let r_max = mm(120.0);
+            Box::new(ndhistogram!(axis_r(nbins_r, r_max); usize))
+        },
+
+        Phi => {
+            let nbins_phi = 10;
+            Box::new(ndhistogram!(axis_phi(nbins_phi); usize))
+        },
+
+        Dz => {
+            let nbins_dz = 10;
+            let dz_max = mm(1000.0);
+            Box::new(ndhistogram!(axis_dz(nbins_dz, dz_max); usize))
+        },
+
+        Zdz => {
+            let nbins_z = 10;
+            let l = mm(200.0);
+            let nbins_dz = 10;
+            let dz_max = mm(1000.0);
+            Box::new(ndhistogram!(axis_z(nbins_z , -l/2.0, l/2.0), axis_dz(nbins_dz, dz_max); usize))
+        },
+
+        Zr => {
+            let nbins_z = 10;
+            let l = mm(200.0);
+            let nbins_r = 10;
+            let r_max = mm(120.0);
+            Box::new(ndhistogram!(axis_z(nbins_z , -l/2.0, l/2.0), axis_r(nbins_r, r_max); usize))
+        },
+
+        Rdz => {
+            let nbins_r = 10;
+            let r_max = mm(120.0);
+            let nbins_dz = 10;
+            let dz_max = mm(1000.0);
+            Box::new(ndhistogram!(axis_r(nbins_r, r_max), axis_dz(nbins_dz, dz_max); usize))
+        },
+
+        Zrdz => {
+            let nbins_z = 10;
+            let l = mm(200.0);
+            let nbins_r = 10;
+            let r_max = mm(120.0);
+            let nbins_dz = 10;
+            let dz_max = mm(1000.0);
+            Box::new(ndhistogram!(axis_z(nbins_z , -l/2.0, l/2.0), axis_r(nbins_r, r_max), axis_dz(nbins_dz, dz_max); usize))
+        },
+
     }
 }
 
-pub fn read_scattergram(args: Args, lgram_name: &str) -> Result<Scattergram, Box<dyn Error>> {
+use structopt::clap::arg_enum;
+arg_enum! {
+    #[derive(Debug, Copy, Clone)]
+    pub enum LorogramAxes { Z, R, Phi, Dz, Zdz, Zr, Rdz, Zrdz }
+}
+
+pub fn read_scattergram(args: Args, lorogram_axes: LorogramAxes) -> Result<Scattergram, Box<dyn Error>> {
     fn fill_scattergram(make_empty_lorogram: &(dyn Fn() -> Box<dyn Lorogram>), lors: ndarray::Array1<Hdf5Lor>) ->  Scattergram {
         let mut sgram = Scattergram::new(make_empty_lorogram);
         for h5lor @Hdf5Lor { x1, x2, E1, E2, .. } in lors {
@@ -174,7 +197,7 @@ pub fn read_scattergram(args: Args, lgram_name: &str) -> Result<Scattergram, Box
                                                         args.ecut.contains(E1) && args.ecut.contains(E2)
                                                     }).collect();
     let now = std::time::Instant::now();
-    let sgram = fill_scattergram(&|| define_histogram(lgram_name), h5lors);
+    let sgram = fill_scattergram(&|| define_histogram(lorogram_axes), h5lors);
     println!("Calculated Scattergram in {} ms", crate::utils::group_digits(now.elapsed().as_millis()));
     Ok(sgram)
 }
