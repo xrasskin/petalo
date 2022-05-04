@@ -38,13 +38,13 @@ impl Scattergram {
     pub fn value(&self, lor: &LOR) -> Ratiof32 {
         let trues = self.trues.value(lor) as f32;
         let scatters = self.scatters.value(lor) as f32;
-        scatters / (trues + scatters)
+        (trues + scatters) / trues
     }
 
     pub fn triplet(&self, lor: &LOR) -> (Ratiof32, Ratiof32, Ratiof32) {
         let trues = self.trues.value(lor) as f32;
         let scatters = self.scatters.value(lor) as f32;
-        (scatters / (trues + scatters), trues, scatters)
+        ((trues + scatters) / trues, trues, scatters)
     }
 }
 // --------------------------------------------------------------------------------
