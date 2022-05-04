@@ -235,7 +235,7 @@ where
             );
 
             // Forward projection of current image into this LOR
-            let projection = forward_project(&weights, &indices, image) + ratio_(lor.additive_correction);
+            let projection = forward_project(&weights, &indices, image) * ratio_(lor.additive_correction);
 
             // Backprojection of LOR onto image
             back_project(&mut backprojection, &weights, &indices, projection);

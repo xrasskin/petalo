@@ -186,6 +186,6 @@ fn assert_image_sizes_match(image: &Image, nvoxels: NVoxels, fov_size: FovSize) 
 
 fn calculate_additive_correction(measured_lors: &mut [LOR], sgram: Scattergram) {
     for lor in measured_lors {
-        lor.additive_correction = ratio(sgram.value(lor));
+        lor.additive_correction = ratio(1.0 + sgram.value(lor));
     }
 }
